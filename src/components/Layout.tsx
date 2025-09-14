@@ -11,7 +11,8 @@ import {
   Stethoscope, 
   User, 
   Settings,
-  Book 
+  Book,
+  FileText 
 } from 'lucide-react';
 import { searchService, SearchResult } from '../lib/searchService';
 import { simpleDb as db } from '../lib/simpleDatabase';
@@ -37,6 +38,7 @@ const Layout = ({ children }: LayoutProps) => {
     { name: 'Modalities', href: '/modalities', icon: Stethoscope },
     { name: 'Protocols', href: '/protocols', icon: Activity },
     { name: 'TCM Theory', href: '/theory', icon: Book },
+    { name: 'Patient Intake', href: '/intake', icon: FileText },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 

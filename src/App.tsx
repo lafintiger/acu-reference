@@ -15,6 +15,10 @@ import AcupressureProtocols from './pages/AcupressureProtocols'
 import CuppingProtocols from './pages/CuppingProtocols'
 import GuaShaProtocols from './pages/GuaShaProtocols'
 import AppliedKinesiologyProtocols from './pages/AppliedKinesiologyProtocols'
+import Intake from './pages/Intake'
+import IntakeAnalysisPage from './pages/IntakeAnalysis'
+import TreatmentModalities from './pages/TreatmentModalities'
+import TreatmentComparison from './pages/TreatmentComparison'
 import Settings from './pages/Settings'
 
 function App() {
@@ -35,8 +39,13 @@ function App() {
           <Route path="/acupressure" element={<AcupressureProtocols />} />
           <Route path="/cupping" element={<CuppingProtocols />} />
           <Route path="/gua-sha" element={<GuaShaProtocols />} />
-          <Route path="/applied-kinesiology" element={<AppliedKinesiologyProtocols />} />
-          <Route path="/settings" element={<Settings />} />
+        <Route path="/applied-kinesiology" element={<AppliedKinesiologyProtocols />} />
+        <Route path="/intake" element={<Intake />} />
+        <Route path="/intake/:id" element={<Intake />} />
+        <Route path="/intake/:id/analysis" element={<IntakeAnalysisPage />} />
+        <Route path="/indications/:indication/modalities" element={<TreatmentModalities />} />
+        <Route path="/indications/:indication/comparison" element={<TreatmentComparison />} />
+        <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
     </ErrorBoundary>

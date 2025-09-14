@@ -169,6 +169,14 @@ public/female-posterior.jpg
 notes/
 personal/
 
+# Patient intake data - NEVER commit personal information
+src/data/intake/
+intake-data/
+patient-data/
+*.intake
+*.patient
+client-data/
+
 # Testing
 /coverage
 

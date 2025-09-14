@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Stethoscope, Leaf, Utensils, Hand, Circle, Waves, Activity, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, MapPin, Stethoscope, Leaf, Utensils, Hand, Circle, Waves, Activity, AlertTriangle, ExternalLink } from 'lucide-react';
 import { simpleDb as db } from '../lib/simpleDatabase';
 import { Indication, Point, Technique } from '../types';
 import { getTechniquesForCondition } from '../data/modalityMappings';
@@ -180,10 +180,19 @@ const IndicationDetail = () => {
 
         {/* Treatment Modalities Overview */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Available Treatment Modalities</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Available Treatment Modalities</h2>
+            <Link
+              to={`/indications/${id}/modalities`}
+              className="flex items-center px-4 py-2 bg-tcm-accent text-white rounded-lg hover:bg-tcm-accent-dark text-sm"
+            >
+              View All Modalities
+              <ExternalLink className="h-4 w-4 ml-2" />
+            </Link>
+          </div>
           <p className="text-gray-600 mb-6">
             Multiple therapeutic approaches are available for treating {indication.label.toLowerCase()}. 
-            Choose the modality that best fits your practice and patient needs.
+            Click "View All Modalities" for detailed information, contraindications, and selection guidance.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -316,7 +325,19 @@ const IndicationDetail = () => {
           {/* Quick Treatment Comparison */}
           {(getAcupressureProtocol(id) || getCuppingProtocol(id) || getGuaShaProtocol(id) || getAppliedKinesiologyProtocol(id)) && (
             <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Treatment Comparison</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-900">Treatment Comparison</h3>
+                <Link
+                  to={`/indications/${id}/comparison`}
+                  className="flex items-center px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                >
+                  Detailed Comparison
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Link>
+              </div>
+              <p className="text-gray-600 text-sm mb-3">
+                Quick overview - click "Detailed Comparison" for effectiveness ratings, contraindications, and selection guidance.
+              </p>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead>
