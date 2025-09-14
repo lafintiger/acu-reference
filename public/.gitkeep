@@ -1,0 +1,11 @@
+# Image Folder
+
+This folder should contain high-resolution anatomical images for the body map feature.
+
+Required files:
+- male-anterior.jpg (Male front view)
+- male-posterior.jpg (Male back view)  
+- female-anterior.jpg (Female front view)
+- female-posterior.jpg (Female back view)
+
+See src/components/ImageInstructions.tsx for download instructions.
