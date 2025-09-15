@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, FileText, Eye, Trash2, Calendar, User, AlertTriangle } from 'lucide-react';
+import { Plus, FileText, Eye, Trash2, Calendar, User, AlertTriangle, Brain } from 'lucide-react';
+import LocalAIAssistant from '../components/LocalAIAssistant';
 import { PatientIntake } from '../types/intake';
 import { intakeDb } from '../lib/intakeDatabase';
 import IntakeForm from '../components/IntakeForm';
@@ -389,20 +390,26 @@ const Intake = () => {
           )}
         </div>
 
-        {/* Analysis Button */}
+        {/* AI Analysis */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Treatment Analysis</h3>
-            <p className="text-gray-600 mb-4">
-              Generate personalized treatment recommendations based on this intake
-            </p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+              <Brain className="h-5 w-5 text-green-600 mr-2" />
+              AI Treatment Analysis
+            </h3>
             <button
               onClick={() => navigate(`/intake/${currentIntake.id}/analysis`)}
-              className="px-6 py-3 bg-tcm-accent text-white rounded-lg hover:bg-tcm-accent-dark"
+              className="px-4 py-2 bg-tcm-accent text-white rounded-lg hover:bg-tcm-accent-dark text-sm"
             >
-              Generate Treatment Plan
+              Full Analysis Page
             </button>
           </div>
+          
+          <LocalAIAssistant 
+            patientData={currentIntake}
+            currentCondition={currentIntake.chiefComplaint.primaryConcern}
+            compact={true}
+          />
         </div>
       </div>
     );

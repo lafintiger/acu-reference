@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Stethoscope, Leaf, Utensils, Hand, Circle, Waves, Activity, AlertTriangle, ExternalLink } from 'lucide-react';
+import SimpleModalityCards from '../components/SimpleModalityCards';
 import { simpleDb as db } from '../lib/simpleDatabase';
 import { Indication, Point, Technique } from '../types';
 import { getTechniquesForCondition } from '../data/modalityMappings';
@@ -195,7 +196,20 @@ const IndicationDetail = () => {
             Click "View All Modalities" for detailed information, contraindications, and selection guidance.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Plugin System Auto-Generated Cards */}
+          <div className="mb-6">
+            <h3 className="font-medium text-gray-900 mb-3 flex items-center">
+              🔧 Plugin System (Auto-Generated from Registered Modalities)
+            </h3>
+            <SimpleModalityCards indication={id} />
+          </div>
+
+          {/* Original Static Cards (for comparison) */}
+          <details className="mb-4">
+            <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-800 mb-3">
+              📋 Original Static Cards (Click to expand for comparison)
+            </summary>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Acupressure */}
             {getAcupressureProtocol(id) && (
               <div className="border border-gray-200 rounded-lg p-4 hover:border-tcm-accent transition-colors">
@@ -321,6 +335,7 @@ const IndicationDetail = () => {
               </div>
             </div>
           </div>
+          </details>
 
           {/* Quick Treatment Comparison */}
           {(getAcupressureProtocol(id) || getCuppingProtocol(id) || getGuaShaProtocol(id) || getAppliedKinesiologyProtocol(id)) && (

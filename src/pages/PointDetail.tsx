@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, AlertTriangle, Clock, FileText } from 'lucide-react';
+import LocalAIAssistant from '../components/LocalAIAssistant';
 import { simpleDb as db } from '../lib/simpleDatabase';
 import { Point, Meridian } from '../types';
 
@@ -142,6 +143,12 @@ const PointDetail = () => {
               <p className="text-gray-700 leading-relaxed">{point.notes}</p>
             </div>
           )}
+
+          {/* AI Assistant for Point Guidance */}
+          <LocalAIAssistant 
+            currentCondition={`point_guidance_${point.id}`}
+            compact={true}
+          />
         </div>
 
         {/* Right column - Indications & contraindications */}

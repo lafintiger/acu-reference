@@ -19,6 +19,8 @@ import Intake from './pages/Intake'
 import IntakeAnalysisPage from './pages/IntakeAnalysis'
 import TreatmentModalities from './pages/TreatmentModalities'
 import TreatmentComparison from './pages/TreatmentComparison'
+import AIAssistant from './pages/AIAssistant'
+import ModalitySystem from './pages/ModalitySystem'
 import Settings from './pages/Settings'
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
         <Route path="/intake/:id/analysis" element={<IntakeAnalysisPage />} />
         <Route path="/indications/:indication/modalities" element={<TreatmentModalities />} />
         <Route path="/indications/:indication/comparison" element={<TreatmentComparison />} />
+        <Route path="/ai-assistant" element={<AIAssistant />} />
+        <Route path="/modality-system" element={<ModalitySystem />} />
         <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>

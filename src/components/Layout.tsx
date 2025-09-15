@@ -39,6 +39,8 @@ const Layout = ({ children }: LayoutProps) => {
     { name: 'Protocols', href: '/protocols', icon: Activity },
     { name: 'TCM Theory', href: '/theory', icon: Book },
     { name: 'Patient Intake', href: '/intake', icon: FileText },
+    { name: 'AI Assistant', href: '/ai-assistant', icon: User },
+    { name: 'Plugin System', href: '/modality-system', icon: Activity },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
 
@@ -229,15 +231,15 @@ const Layout = ({ children }: LayoutProps) => {
                             <h4 className="text-sm font-medium text-gray-900 truncate">
                               {result.title}
                             </h4>
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded capitalize">
+                            <span className="text-xs text-white bg-tcm-accent px-2 py-1 rounded capitalize">
                               {result.type}
                             </span>
                           </div>
                           {result.subtitle && (
-                            <p className="text-sm text-gray-600 truncate">{result.subtitle}</p>
+                            <p className="text-sm text-gray-700 truncate font-medium">{result.subtitle}</p>
                           )}
                           {result.snippet && (
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{result.snippet}</p>
+                            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{result.snippet}</p>
                           )}
                         </div>
                       </div>
