@@ -20,8 +20,8 @@ export class OllamaClient {
   constructor(config: Partial<OllamaConfig> = {}) {
     this.config = {
       baseUrl: config.baseUrl || 'http://localhost:11434',
-      model: config.model || 'meditron:7b-q5_K_M', // Use available medical model
-      timeout: config.timeout || 30000
+      model: config.model || 'huihui_ai/gpt-oss-abliterated:20b-q8_0', // Use preferred model
+      timeout: config.timeout || 60000 // Increased timeout for large documents
     };
   }
 
@@ -85,11 +85,17 @@ export class OllamaClient {
       
       console.log('Ollama request body:', requestBody);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
+      
       const response = await fetch(`${this.config.baseUrl}/api/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       console.log('Ollama response status:', response.status);
 

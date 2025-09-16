@@ -408,68 +408,6 @@ export const points: Point[] = [
     notes: 'Final point of Large Intestine meridian. Master point for nasal conditions and olfactory disorders.'
   },
 
-  // Additional Essential Large Intestine Points
-  {
-    id: 'LI12',
-    meridianId: 'LI',
-    nameEn: 'Zhouliao',
-    namePinyin: 'Zhǒu Liáo',
-    nameCharacters: '肘髎',
-    category: 'standard',
-    location: 'On the lateral side of the upper arm, 1 cun superior to LI11, on the lateral border of the humerus.',
-    indications: ['elbow_pain', 'arm_pain', 'shoulder_pain'],
-    acupressureDepth: 'Moderate pressure, 1-2 minutes',
-    notes: 'Local point for elbow and arm conditions.'
-  },
-  {
-    id: 'LI13',
-    meridianId: 'LI',
-    nameEn: 'Shouwuli',
-    namePinyin: 'Shǒu Wǔ Lǐ',
-    nameCharacters: '手五里',
-    category: 'standard',
-    location: '3 cun superior to LI11, on the line connecting LI11 and LI15.',
-    indications: ['arm_pain', 'shoulder_pain', 'scrofula', 'hemiplegia'],
-    acupressureDepth: 'Moderate pressure, 1-2 minutes',
-    notes: 'Good for upper arm and shoulder conditions.'
-  },
-  {
-    id: 'LI14',
-    meridianId: 'LI',
-    nameEn: 'Binao',
-    namePinyin: 'Bì Nào',
-    nameCharacters: '臂臑',
-    category: 'standard',
-    location: 'On the lateral side of the upper arm, at the insertion of the deltoid muscle.',
-    indications: ['shoulder_pain', 'arm_pain', 'neck_stiffness', 'scrofula'],
-    acupressureDepth: 'Moderate pressure, 1-2 minutes',
-    notes: 'Important point for shoulder and upper arm disorders.'
-  },
-  {
-    id: 'LI15',
-    meridianId: 'LI',
-    nameEn: 'Jianyu',
-    namePinyin: 'Jiān Yú',
-    nameCharacters: '肩髃',
-    category: 'standard',
-    location: 'In the depression between the acromial extremity of the clavicle and the greater tubercle of the humerus.',
-    indications: ['shoulder_pain', 'arm_pain', 'hemiplegia', 'hypertension'],
-    acupressureDepth: 'Moderate to firm pressure, 1-3 minutes',
-    notes: 'Master point for shoulder disorders. Meeting point with Yang Qiao Mai.'
-  },
-  {
-    id: 'LI16',
-    meridianId: 'LI',
-    nameEn: 'Jugu',
-    namePinyin: 'Jù Gǔ',
-    nameCharacters: '巨骨',
-    category: 'standard',
-    location: 'In the depression between the acromial end of the clavicle and the spine of the scapula.',
-    indications: ['shoulder_pain', 'arm_pain', 'cough', 'asthma'],
-    acupressureDepth: 'Light to moderate pressure, 1-2 minutes',
-    notes: 'Good for shoulder conditions and respiratory problems.'
-  },
-
   // Stomach Meridian (ST) - Essential Clinical Points (45 total)
   {
     id: 'ST1',

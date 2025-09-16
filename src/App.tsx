@@ -21,6 +21,10 @@ import TreatmentModalities from './pages/TreatmentModalities'
 import TreatmentComparison from './pages/TreatmentComparison'
 import AIAssistant from './pages/AIAssistant'
 import ModalitySystem from './pages/ModalitySystem'
+import Assessment from './pages/Assessment'
+import TreatmentPlanning from './pages/TreatmentPlanning'
+import Monitoring from './pages/Monitoring'
+import KnowledgeManagement from './pages/KnowledgeManagement'
 import Settings from './pages/Settings'
 
 function App() {
@@ -49,6 +53,10 @@ function App() {
         <Route path="/indications/:indication/comparison" element={<TreatmentComparison />} />
         <Route path="/ai-assistant" element={<AIAssistant />} />
         <Route path="/modality-system" element={<ModalitySystem />} />
+        <Route path="/assessment" element={<Assessment />} />
+        <Route path="/treatment" element={<TreatmentPlanning />} />
+        <Route path="/monitoring" element={<Monitoring />} />
+        <Route path="/knowledge" element={<KnowledgeManagement />} />
         <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>

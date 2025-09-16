@@ -6,6 +6,7 @@ import { Brain, Send, Loader, AlertCircle, CheckCircle, Settings } from 'lucide-
 import VoiceControl from './VoiceControl';
 import { ollamaClient } from '../lib/ai/ollama-client';
 import { tcmAssistant } from '../lib/ai/tcm-assistant';
+import { documentStore } from '../lib/rag/document-store';
 
 interface LocalAIAssistantProps {
   patientData?: any;
@@ -24,6 +25,7 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [selectedModel, setSelectedModel] = useState<string>('');
 
   useEffect(() => {
     checkAIAvailability();
@@ -39,13 +41,15 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
         const models = await ollamaClient.getAvailableModels();
         setAvailableModels(models);
         
-        // Auto-select meditron model if available, otherwise first model
+        // Auto-select preferred model if available
+        const preferredModel = models.find(m => m.includes('gpt-oss-abliterated'));
         const meditronModel = models.find(m => m.includes('meditron'));
-        const selectedModel = meditronModel || models[0];
+        const defaultModel = preferredModel || meditronModel || models[0];
         
-        if (selectedModel) {
-          ollamaClient.setModel(selectedModel);
-          console.log('Selected model:', selectedModel);
+        if (defaultModel) {
+          setSelectedModel(defaultModel);
+          ollamaClient.setModel(defaultModel);
+          console.log('Selected model:', defaultModel);
         }
       }
     } catch (error) {
@@ -54,6 +58,12 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
     } finally {
       setChecking(false);
     }
+  };
+
+  const handleModelChange = (newModel: string) => {
+    setSelectedModel(newModel);
+    ollamaClient.setModel(newModel);
+    console.log('Model changed to:', newModel);
   };
 
   const handleSendMessage = async () => {
@@ -177,9 +187,24 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
             <Brain className="h-4 w-4 text-green-600 mr-2" />
             Local AI Assistant
           </h3>
-          <div className="flex items-center text-sm text-green-600">
-            <CheckCircle className="h-4 w-4 mr-1" />
-            Online
+          <div className="flex items-center space-x-3">
+            {availableModels.length > 1 && (
+              <select
+                value={selectedModel}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-green-500 bg-white text-gray-900"
+              >
+                {availableModels.map(model => (
+                  <option key={model} value={model}>
+                    {model.length > 20 ? model.substring(0, 20) + '...' : model}
+                  </option>
+                ))}
+              </select>
+            )}
+            <div className="flex items-center text-sm text-green-600">
+              <CheckCircle className="h-4 w-4 mr-1" />
+              Online
+            </div>
           </div>
         </div>
 
@@ -191,7 +216,8 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder="Ask about treatment, points, or safety..."
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-black"
+              style={{ backgroundColor: 'white', color: 'black' }}
               disabled={loading}
             />
             <button
@@ -234,12 +260,44 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
         </div>
       </div>
 
-      {/* Model Info */}
+      {/* Model Selection */}
       {availableModels.length > 0 && (
         <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-          <div className="text-sm text-gray-700">
-            <strong>Active Model:</strong> {availableModels[0]} 
-            <span className="ml-2 text-green-600">({availableModels.length} available)</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <label className="text-sm font-medium text-gray-700">AI Model:</label>
+              <select
+                value={selectedModel}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+              >
+                {availableModels.map(model => (
+                  <option key={model} value={model}>
+                    {model}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="text-sm text-green-600">
+              {availableModels.length} models available
+            </div>
+          </div>
+          
+          {/* Model Info */}
+          <div className="mt-2 text-xs text-gray-600">
+            <div><strong>Active:</strong> {selectedModel}</div>
+            {selectedModel.includes('gpt-oss-abliterated') && (
+              <div className="text-green-600">🚀 GPT-OSS Abliterated - High performance, uncensored responses</div>
+            )}
+            {selectedModel.includes('meditron') && (
+              <div className="text-blue-600">🏥 Medical AI - Optimized for clinical content</div>
+            )}
+            {selectedModel.includes('llama') && (
+              <div className="text-purple-600">🧠 General AI - Good for diverse tasks</div>
+            )}
+            {selectedModel.includes('mistral') && (
+              <div className="text-orange-600">⚡ Fast AI - Quick responses</div>
+            )}
           </div>
         </div>
       )}
@@ -272,7 +330,8 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Ask about treatment protocols, point locations, safety considerations..."
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-black"
+            style={{ backgroundColor: 'white', color: 'black' }}
             disabled={loading}
           />
           <button

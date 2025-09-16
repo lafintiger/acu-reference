@@ -12,6 +12,7 @@ import {
   User, 
   Settings,
   Book,
+  BookOpen,
   FileText 
 } from 'lucide-react';
 import { searchService, SearchResult } from '../lib/searchService';
@@ -32,14 +33,26 @@ const Layout = ({ children }: LayoutProps) => {
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
+    
+    // Clinical Workflow Process (In Order)
+    { name: 'Patient Intake', href: '/intake', icon: FileText },
+    { name: 'Clinical Assessment', href: '/assessment', icon: Stethoscope },
+    { name: 'Treatment Planning', href: '/treatment', icon: Activity },
+    { name: 'Monitoring', href: '/monitoring', icon: List },
+    
+    // Reference & Tools
+    { name: 'Points Database', href: '/points', icon: MapPin },
     { name: 'Body Map', href: '/body-map', icon: User },
-    { name: 'Points', href: '/points', icon: MapPin },
     { name: 'Indications', href: '/indications', icon: List },
     { name: 'Modalities', href: '/modalities', icon: Stethoscope },
     { name: 'Protocols', href: '/protocols', icon: Activity },
+    
+    // Knowledge & Learning
     { name: 'TCM Theory', href: '/theory', icon: Book },
-    { name: 'Patient Intake', href: '/intake', icon: FileText },
+    { name: 'Workshop Content', href: '/knowledge', icon: BookOpen },
     { name: 'AI Assistant', href: '/ai-assistant', icon: User },
+    
+    // System Management
     { name: 'Plugin System', href: '/modality-system', icon: Activity },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
@@ -209,7 +222,8 @@ const Layout = ({ children }: LayoutProps) => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => searchQuery && setShowResults(true)}
                   onBlur={() => setTimeout(() => setShowResults(false), 200)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tcm-accent focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-tcm-accent focus:border-transparent bg-white text-black"
+                  style={{ backgroundColor: 'white', color: 'black' }}
                 />
               </div>
 
