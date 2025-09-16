@@ -7,6 +7,8 @@ import VoiceControl from './VoiceControl';
 import { ollamaClient } from '../lib/ai/ollama-client';
 import { tcmAssistant } from '../lib/ai/tcm-assistant';
 import { documentStore } from '../lib/rag/document-store';
+import { simpleDb } from '../lib/simpleDatabase';
+import { searchService } from '../lib/searchService';
 
 interface LocalAIAssistantProps {
   patientData?: any;
@@ -75,12 +77,42 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
     try {
       let aiResponse = '';
       
-      // For now, let's use direct Ollama client for simpler debugging
-      console.log('Making direct Ollama request...');
-      aiResponse = await ollamaClient.chat(message);
-      console.log('AI response received:', aiResponse);
-
-      console.log('Setting response:', aiResponse);
+      // Search BOTH RAG library AND main database for comprehensive context
+      console.log('🔍 Searching RAG library for workshop manual context...');
+      const ragContext = await documentStore.getContextForQuery(message);
+      console.log('📚 RAG context length:', ragContext.length);
+      
+      console.log('🔍 Searching main database for points and protocols...');
+      const databaseContext = await getDatabaseContext(message);
+      console.log('💾 Database context length:', databaseContext.length);
+      
+      // Combine both contexts for comprehensive AI response
+      let enhancedMessage = message;
+      
+      if (ragContext !== 'No relevant content found in manual library.') {
+        enhancedMessage += `\n\nRelevant context from your workshop manuals:\n${ragContext}`;
+      }
+      
+      if (databaseContext) {
+        enhancedMessage += `\n\nRelevant context from your clinical database:\n${databaseContext}`;
+      }
+      
+      console.log('📤 Sending comprehensive message to AI...');
+      console.log('💬 Total context length:', enhancedMessage.length);
+      
+      console.log('📤 Sending enhanced message to AI...');
+      console.log('💬 Message preview:', enhancedMessage.substring(0, 200) + '...');
+      
+      // Context-aware responses
+      if (patientData) {
+        aiResponse = await tcmAssistant.analyzePatientIntake(patientData);
+      } else if (currentCondition) {
+        aiResponse = await tcmAssistant.getTreatmentSuggestions([currentCondition]);
+      } else {
+        aiResponse = await ollamaClient.chat(enhancedMessage);
+      }
+      
+      console.log('✅ AI response received:', aiResponse.substring(0, 200) + '...');
       setResponse(aiResponse || 'AI response was empty');
     } catch (error) {
       console.error('AI request failed:', error);
@@ -88,6 +120,82 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
     } finally {
       setLoading(false);
       setMessage('');
+    }
+  };
+
+  // Get relevant context from main clinical database
+  const getDatabaseContext = async (query: string): Promise<string> => {
+    try {
+      let context = '';
+      
+      // Search for relevant points
+      const pointResults = searchService.search(query, 3);
+      if (pointResults.length > 0) {
+        const pointContext = pointResults.map(result => {
+          const point = simpleDb.getPointById(result.id);
+          if (point) {
+            return `${point.id} (${point.nameEn}): ${point.location}\nIndications: ${point.indications.join(', ')}\nTechnique: ${point.acupressureDepth}`;
+          }
+          return '';
+        }).filter(Boolean).join('\n\n');
+        
+        if (pointContext) {
+          context += `\nRelevant Acupuncture Points:\n${pointContext}`;
+        }
+      }
+      
+      // Search for relevant indications
+      const indications = simpleDb.getAllIndications();
+      const relevantIndications = indications.filter(indication => 
+        indication.nameEn.toLowerCase().includes(query.toLowerCase()) ||
+        query.toLowerCase().includes(indication.nameEn.toLowerCase()) ||
+        indication.synonyms?.some(synonym => 
+          synonym.toLowerCase().includes(query.toLowerCase())
+        )
+      ).slice(0, 2);
+      
+      if (relevantIndications.length > 0) {
+        const indicationContext = relevantIndications.map(indication => 
+          `${indication.nameEn}: ${indication.description}\nCategory: ${indication.category}`
+        ).join('\n\n');
+        
+        if (indicationContext) {
+          context += `\n\nRelevant Clinical Conditions:\n${indicationContext}`;
+        }
+      }
+      
+      // Search for relevant modality protocols
+      const { modalityRegistry } = await import('../lib/modality-system/registry');
+      const allModalities = modalityRegistry.getAll();
+      const relevantProtocols = [];
+      
+      allModalities.forEach(modality => {
+        const protocols = modality.getProtocolsForIndication(query.toLowerCase().replace(/\s+/g, '_'));
+        if (protocols.length > 0) {
+          relevantProtocols.push({
+            modality: modality.name,
+            protocols: protocols.slice(0, 2) // Top 2 protocols per modality
+          });
+        }
+      });
+      
+      if (relevantProtocols.length > 0) {
+        const protocolContext = relevantProtocols.map(({ modality, protocols }) =>
+          `${modality} Protocols:\n${protocols.map(p => 
+            `- ${p.indication}: ${p.primaryPoints?.join(', ') || 'See protocol'}`
+          ).join('\n')}`
+        ).join('\n\n');
+        
+        if (protocolContext) {
+          context += `\n\nRelevant Treatment Protocols:\n${protocolContext}`;
+        }
+      }
+      
+      return context;
+      
+    } catch (error) {
+      console.error('❌ Database context search failed:', error);
+      return '';
     }
   };
 

@@ -154,8 +154,8 @@ class EmbeddingServiceManager {
     this.service = new EmbeddingService('http://localhost:11434', model);
     console.log('🔢 Embedding model changed to:', model);
     
-    // Force update the singleton reference
-    (global as any).embeddingService = this.service;
+    // Force update the singleton reference (browser-safe)
+    (window as any).embeddingService = this.service;
   }
   
   getService(): EmbeddingService {

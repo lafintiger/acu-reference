@@ -194,17 +194,34 @@ const ManualLibrary = () => {
               Search Results ({searchResults.length})
             </h3>
             {searchResults.map(result => (
-              <SearchResultCard 
-                key={result.id} 
-                result={result} 
-                onKeywordClick={(keyword) => {
-                  setSearchQuery(keyword);
-                  handleSearch();
-                }}
-                onExpandContent={(content) => {
-                  alert(`Full Content:\n\n${content}`);
-                }}
-              />
+              <div key={result.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h4 className="font-medium text-gray-900">{result.documentTitle}</h4>
+                    <p className="text-sm text-gray-600">Page {result.pageNumber} • {result.contentType}</p>
+                  </div>
+                  <div className="text-xs bg-tcm-light text-tcm-accent px-2 py-1 rounded">
+                    Score: {result.score}
+                  </div>
+                </div>
+                <div className="text-sm text-gray-700 bg-gray-50 rounded p-3">
+                  <div className="whitespace-pre-wrap">{result.content}</div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {result.keywords.slice(0, 8).map((keyword: string) => (
+                    <button
+                      key={keyword}
+                      onClick={() => {
+                        setSearchQuery(keyword);
+                        handleSearch();
+                      }}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs hover:bg-blue-200 cursor-pointer"
+                    >
+                      {keyword}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}
