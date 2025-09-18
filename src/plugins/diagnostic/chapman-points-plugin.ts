@@ -3,6 +3,7 @@
 
 import { DiagnosticPlugin, AssessmentFinding } from '../../types/clinical-workflow';
 import { chapmanPoints } from '../../data/chapman-points';
+import { DiagnosticPoint } from '../../types/clinical-workflow';
 
 export class ChapmanPointsPlugin implements DiagnosticPlugin {
   id = 'chapman_points';

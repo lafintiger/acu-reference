@@ -272,9 +272,10 @@ const ProtocolReviewCard: React.FC<ProtocolReviewCardProps> = ({
               </div>
             </div>
           </div>
-        )}
-      </div>
-    ))}
-  </div>
-</div>
-)}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ProtocolReviewCard;

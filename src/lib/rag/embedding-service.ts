@@ -1,10 +1,13 @@
 // Embedding Service - Vector embeddings for RAG system
-// Uses embeddinggemma model for semantic document search
+// Uses embeddinggemma model for semantic document search with intelligent caching
+
+import { embeddingCache } from './EmbeddingCache';
 
 export interface EmbeddingResult {
   embedding: number[];
   success: boolean;
   error?: string;
+  fromCache?: boolean;
 }
 
 export class EmbeddingService {
@@ -16,9 +19,23 @@ export class EmbeddingService {
     this.embeddingModel = embeddingModel;
   }
 
-  // Create embedding for text using selected model
+  // Create embedding for text using selected model with caching
   async createEmbedding(text: string): Promise<EmbeddingResult> {
     try {
+      // Create cache key from text content
+      const cacheKey = this.createCacheKey(text);
+      
+      // Check cache first
+      const cachedEmbedding = embeddingCache.get(cacheKey);
+      if (cachedEmbedding) {
+        console.log(`💾 Embedding retrieved from cache: ${cacheKey.substring(0, 20)}...`);
+        return {
+          embedding: cachedEmbedding,
+          success: true,
+          fromCache: true
+        };
+      }
+
       console.log(`🔢 Creating embedding with ${this.embeddingModel}...`);
       
       const response = await fetch(`${this.baseUrl}/api/embeddings`, {
@@ -36,9 +53,13 @@ export class EmbeddingService {
 
       const data = await response.json();
       
+      // Cache the embedding for future use
+      embeddingCache.set(cacheKey, data.embedding);
+      
       return {
         embedding: data.embedding,
-        success: true
+        success: true,
+        fromCache: false
       };
       
     } catch (error) {
@@ -46,7 +67,8 @@ export class EmbeddingService {
       return {
         embedding: [],
         success: false,
-        error: `Failed to create embedding: ${error}`
+        error: `Failed to create embedding: ${error}`,
+        fromCache: false
       };
     }
   }
@@ -139,6 +161,35 @@ export class EmbeddingService {
       model: this.embeddingModel,
       dimensions: available ? 4096 : undefined // Qwen3-Embedding-8B dimensions
     };
+  }
+
+  // Get cache statistics
+  getCacheStats() {
+    return embeddingCache.getStats();
+  }
+
+  // Clear embedding cache
+  clearCache(): void {
+    embeddingCache.clear();
+  }
+
+  // Optimize cache performance
+  optimizeCache(): void {
+    embeddingCache.optimize();
+  }
+
+  // Create cache key from text content
+  private createCacheKey(text: string): string {
+    // Create a hash-like key from the text
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      const char = text.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    
+    // Include model name in key to handle model changes
+    return `${this.embeddingModel}_${Math.abs(hash).toString(16)}_${text.length}`;
   }
 }
 

@@ -105,11 +105,11 @@ export class AppliedKinesiologyPlugin extends BaseModalityPlugin {
 
   private convertLegacyProtocols(): ModalityProtocol[] {
     return appliedKinesiologyProtocols.map(protocol => ({
-      id: `ak_${protocol.indication}`,
+      id: `ak_${protocol.indicationId}`,
       modalityId: 'applied_kinesiology',
-      indication: protocol.indication,
-      name: `AK Assessment for ${protocol.indication.replace('_', ' ')}`,
-      description: `Applied Kinesiology assessment and correction protocol for ${protocol.indication.replace('_', ' ')}`,
+      indication: protocol.indicationId,
+      name: `AK Assessment for ${protocol.indicationId.replace('_', ' ')}`,
+      description: `Applied Kinesiology assessment and correction protocol for ${protocol.indicationId.replace('_', ' ')}`,
       steps: [
         {
           id: 'assessment',
@@ -118,9 +118,9 @@ export class AppliedKinesiologyPlugin extends BaseModalityPlugin {
           title: 'Muscle Assessment',
           description: 'Test primary muscle groups',
           duration: '10-15 minutes',
-          points: protocol.primaryMuscles,
+          points: protocol.primaryAssessments.map(assessment => assessment.muscleName),
           techniques: ['manual_muscle_testing'],
-          notes: `Associated meridians: ${protocol.associatedMeridians.join(', ')}`
+          notes: `Primary assessments: ${protocol.primaryAssessments.map(a => a.muscleName).join(', ')}`
         },
         {
           id: 'treatment',
@@ -129,8 +129,8 @@ export class AppliedKinesiologyPlugin extends BaseModalityPlugin {
           title: 'Correction Techniques',
           description: protocol.clinicalNotes,
           duration: '10-20 minutes',
-          techniques: protocol.correctionTechniques,
-          notes: `Weakness indications: ${protocol.weaknessIndications.join(', ')}`
+          techniques: protocol.corrections.map(c => c.correctionType),
+          notes: `Corrections: ${protocol.corrections.map(c => c.targetArea).join(', ')}`
         }
       ],
       duration: '30-45 minutes',

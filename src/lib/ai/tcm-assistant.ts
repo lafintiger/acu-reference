@@ -101,12 +101,13 @@ Prioritize safety and effectiveness for this specific patient profile.`;
 
   // Get point-specific guidance
   async getPointGuidance(pointId: string, patientContext?: string): Promise<string> {
-    const point = simpleDb.getPointById(pointId);
-    if (!point) {
-      return `Point ${pointId} not found in database.`;
-    }
+    try {
+      const point = await simpleDb.getPoint(pointId);
+      if (!point) {
+        return `Point ${pointId} not found in database.`;
+      }
 
-    const prompt = `POINT GUIDANCE REQUEST
+      const prompt = `POINT GUIDANCE REQUEST
 
 Point: ${point.id} - ${point.nameEn} (${point.namePinyin})
 Chinese: ${point.nameCharacters}
@@ -124,7 +125,11 @@ Please provide:
 
 Make it practical for immediate clinical application.`;
 
-    return await ollamaClient.chat(prompt, this.systemPrompt);
+      return await ollamaClient.chat(prompt, this.systemPrompt);
+    } catch (error) {
+      console.error('Point guidance failed:', error);
+      return `Unable to retrieve guidance for ${pointId}. Please check the point ID and try again.`;
+    }
   }
 
   // Quick modality selection guidance
@@ -174,24 +179,29 @@ Provide specific reasoning for your recommendation.`;
     return summary;
   }
 
-  private getRelevantPoints(patientData: any): string {
-    // Get points relevant to patient's condition
-    const allPoints = simpleDb.getAllPoints();
-    const chiefComplaint = patientData?.chiefComplaint?.primaryConcern?.toLowerCase() || '';
-    
-    const relevantPoints = allPoints.filter(point => 
-      point.indications.some(indication => 
-        chiefComplaint.includes(indication) || indication.includes(chiefComplaint.split(' ')[0])
-      )
-    ).slice(0, 10); // Top 10 relevant points
+  private async getRelevantPoints(patientData: any): Promise<string> {
+    try {
+      // Get points relevant to patient's condition
+      const allPoints = await simpleDb.getPoints();
+      const chiefComplaint = patientData?.chiefComplaint?.primaryConcern?.toLowerCase() || '';
+      
+      const relevantPoints = allPoints.filter(point => 
+        point.indications.some(indication => 
+          chiefComplaint.includes(indication) || indication.includes(chiefComplaint.split(' ')[0])
+        )
+      ).slice(0, 10); // Top 10 relevant points
 
-    return relevantPoints.map(point => 
-      `${point.id} (${point.nameEn}): ${point.location} - ${point.indications.join(', ')}`
-    ).join('\n');
+      return relevantPoints.map(point => 
+        `${point.id} (${point.nameEn}): ${point.location} - ${point.indications.join(', ')}`
+      ).join('\n');
+    } catch (error) {
+      console.error('Failed to get relevant points:', error);
+      return 'Unable to retrieve relevant points from database.';
+    }
   }
 
-  private getPointsForSymptoms(symptoms: string[]): string {
-    const allPoints = simpleDb.getAllPoints();
+  private async getPointsForSymptoms(symptoms: string[]): Promise<string> {
+    const allPoints = await simpleDb.getPoints();
     const relevantPoints = allPoints.filter(point =>
       symptoms.some(symptom => 
         point.indications.some(indication => 

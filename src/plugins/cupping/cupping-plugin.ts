@@ -162,11 +162,11 @@ export class CuppingPlugin extends BaseModalityPlugin {
   // Convert existing cupping protocols to new format
   private convertLegacyProtocols(): ModalityProtocol[] {
     return cuppingProtocols.map(protocol => ({
-      id: `cupping_${protocol.indication}`,
+      id: `cupping_${protocol.indicationId}`,
       modalityId: 'cupping',
-      indication: protocol.indication,
-      name: `Cupping Therapy for ${protocol.indication.replace('_', ' ')}`,
-      description: `Professional cupping treatment protocol for ${protocol.indication.replace('_', ' ')}`,
+      indication: protocol.indicationId,
+      name: `Cupping Therapy for ${protocol.indicationId.replace('_', ' ')}`,
+      description: `Professional cupping treatment protocol for ${protocol.indicationId.replace('_', ' ')}`,
       steps: [
         {
           id: 'preparation',
@@ -184,10 +184,10 @@ export class CuppingPlugin extends BaseModalityPlugin {
           type: 'treatment',
           title: 'Cupping Application',
           description: protocol.clinicalNotes,
-          duration: protocol.duration,
-          points: protocol.primaryAreas,
-          techniques: [protocol.technique, `${protocol.cupSize} cups`, `${protocol.suctionLevel} suction`],
-          notes: `Cup sizes: ${protocol.cupSize} | Suction: ${protocol.suctionLevel}`
+          duration: protocol.totalDuration,
+          points: protocol.primaryAreas.map(area => area.areaName),
+          techniques: protocol.primaryAreas.map(area => `${area.technique} - ${area.cupSize} cup`),
+          notes: `Treatment areas: ${protocol.primaryAreas.map(area => area.areaName).join(', ')}`
         },
         {
           id: 'evaluation',
@@ -200,12 +200,12 @@ export class CuppingPlugin extends BaseModalityPlugin {
           notes: 'Explain normal skin discoloration and duration'
         }
       ],
-      duration: protocol.duration,
+      duration: protocol.totalDuration,
       frequency: protocol.frequency,
       difficulty: 'intermediate',
       contraindications: protocol.contraindications || [],
       precautions: ['Monitor skin condition', 'Avoid over-suction', 'Educate patient about marks'],
-      expectedOutcomes: [`Improved circulation in ${protocol.indication.replace('_', ' ')}`, 'Reduced muscle tension', 'Pain relief'],
+      expectedOutcomes: [`Improved circulation in ${protocol.indicationId.replace('_', ' ')}`, 'Reduced muscle tension', 'Pain relief'],
       clinicalNotes: protocol.clinicalNotes
     }));
   }

@@ -12,8 +12,8 @@ export const cuppingPlugin: SimpleModalityPlugin = {
 
   getProtocolsForIndication(indication: string): any[] {
     return cuppingProtocols.filter(protocol => 
-      protocol.indication === indication ||
-      protocol.indication.toLowerCase().includes(indication.toLowerCase())
+      protocol.indicationId === indication ||
+      protocol.indicationId.toLowerCase().includes(indication.toLowerCase())
     );
   }
 };

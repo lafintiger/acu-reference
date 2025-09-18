@@ -1,7 +1,7 @@
 // Local AI Assistant Component
 // Privacy-first AI integration using Ollama
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Brain, Send, Loader, AlertCircle, CheckCircle, Settings } from 'lucide-react';
 import VoiceControl from './VoiceControl';
 import { ollamaClient } from '../lib/ai/ollama-client';
@@ -9,6 +9,7 @@ import { tcmAssistant } from '../lib/ai/tcm-assistant';
 import { documentStore } from '../lib/rag/document-store';
 import { simpleDb } from '../lib/simpleDatabase';
 import { searchService } from '../lib/searchService';
+import MarkdownRenderer from './MarkdownRenderer';
 
 interface LocalAIAssistantProps {
   patientData?: any;
@@ -62,11 +63,11 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
     }
   };
 
-  const handleModelChange = (newModel: string) => {
+  const handleModelChange = useCallback((newModel: string) => {
     setSelectedModel(newModel);
     ollamaClient.setModel(newModel);
     console.log('Model changed to:', newModel);
-  };
+  }, []);
 
   const handleSendMessage = async () => {
     if (!message.trim() || loading || !isAvailable) return;
@@ -132,9 +133,9 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
       const pointResults = searchService.search(query, 3);
       if (pointResults.length > 0) {
         const pointContext = pointResults.map(result => {
-          const point = simpleDb.getPointById(result.id);
-          if (point) {
-            return `${point.id} (${point.nameEn}): ${point.location}\nIndications: ${point.indications.join(', ')}\nTechnique: ${point.acupressureDepth}`;
+          // Get point from search results directly since they contain the data
+          if (result.type === 'point') {
+            return `${result.id} (${result.title}): ${result.subtitle}\nType: Acupuncture Point`;
           }
           return '';
         }).filter(Boolean).join('\n\n');
@@ -144,19 +145,13 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
         }
       }
       
-      // Search for relevant indications
-      const indications = simpleDb.getAllIndications();
-      const relevantIndications = indications.filter(indication => 
-        indication.nameEn.toLowerCase().includes(query.toLowerCase()) ||
-        query.toLowerCase().includes(indication.nameEn.toLowerCase()) ||
-        indication.synonyms?.some(synonym => 
-          synonym.toLowerCase().includes(query.toLowerCase())
-        )
-      ).slice(0, 2);
+      // Search for relevant indications through search service
+      const indicationResults = searchService.search(query + ' indication', 2);
+      const relevantIndications = indicationResults.filter(result => result.type === 'indication');
       
       if (relevantIndications.length > 0) {
-        const indicationContext = relevantIndications.map(indication => 
-          `${indication.nameEn}: ${indication.description}\nCategory: ${indication.category}`
+        const indicationContext = relevantIndications.map(result => 
+          `${result.title}: ${result.subtitle || 'Clinical condition'}\nType: ${result.type}`
         ).join('\n\n');
         
         if (indicationContext) {
@@ -199,8 +194,8 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
     }
   };
 
-  // Quick action buttons for common requests
-  const quickActions = [
+  // Memoized quick actions to prevent recreation on each render
+  const quickActions = useMemo(() => [
     {
       label: 'Analyze Patient',
       action: () => patientData && handleSendMessage(),
@@ -233,7 +228,7 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
       },
       enabled: true
     }
-  ];
+  ], [patientData, currentCondition, handleSendMessage]);
 
   if (checking) {
     return (
@@ -339,7 +334,9 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
 
           {response && (
             <div className="bg-white border border-gray-300 rounded-lg p-3 shadow-sm">
-              <p className="text-gray-900 text-sm whitespace-pre-wrap leading-relaxed">{response}</p>
+              <div className="text-gray-900 text-sm leading-relaxed">
+                <MarkdownRenderer content={response} />
+              </div>
             </div>
           )}
         </div>
@@ -488,8 +485,8 @@ const LocalAIAssistant: React.FC<LocalAIAssistantProps> = ({
         {response && (
           <div className="bg-white border border-gray-300 rounded-lg p-4 shadow-sm">
             <h3 className="font-semibold text-gray-900 mb-2">AI Analysis & Recommendations:</h3>
-            <div className="text-gray-900 text-sm whitespace-pre-wrap leading-relaxed bg-gray-50 p-3 rounded border">
-              {response}
+            <div className="text-gray-900 text-sm leading-relaxed bg-gray-50 p-3 rounded border">
+              <MarkdownRenderer content={response} />
             </div>
           </div>
         )}

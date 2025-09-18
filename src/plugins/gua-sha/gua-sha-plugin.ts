@@ -107,11 +107,11 @@ export class GuaShaPlugin extends BaseModalityPlugin {
 
   private convertLegacyProtocols(): ModalityProtocol[] {
     return guaShaProtocols.map(protocol => ({
-      id: `gua_sha_${protocol.indication}`,
+      id: `gua_sha_${protocol.indicationId}`,
       modalityId: 'gua_sha',
-      indication: protocol.indication,
-      name: `Gua Sha for ${protocol.indication.replace('_', ' ')}`,
-      description: `Gua Sha treatment protocol for ${protocol.indication.replace('_', ' ')}`,
+      indication: protocol.indicationId,
+      name: `Gua Sha for ${protocol.indicationId.replace('_', ' ')}`,
+      description: `Gua Sha treatment protocol for ${protocol.indicationId.replace('_', ' ')}`,
       steps: [
         {
           id: 'preparation',
@@ -120,7 +120,7 @@ export class GuaShaPlugin extends BaseModalityPlugin {
           title: 'Preparation',
           description: 'Prepare tools and treatment area',
           duration: '2-3 minutes',
-          equipment: [protocol.tool, 'massage_oil']
+          equipment: protocol.primaryAreas.map(area => area.toolType).concat(['massage_oil'])
         },
         {
           id: 'treatment',
@@ -128,13 +128,13 @@ export class GuaShaPlugin extends BaseModalityPlugin {
           type: 'treatment',
           title: 'Gua Sha Application',
           description: protocol.clinicalNotes,
-          duration: protocol.duration,
-          points: protocol.primaryAreas,
-          techniques: [protocol.pressure, protocol.scrapingDirection],
-          notes: `Tool: ${protocol.tool} | Direction: ${protocol.scrapingDirection}`
+          duration: protocol.totalDuration,
+          points: protocol.primaryAreas.map(area => area.areaName),
+          techniques: protocol.primaryAreas.map(area => `${area.pressure} ${area.scrapingDirection}`),
+          notes: `Primary areas: ${protocol.primaryAreas.map(area => area.areaName).join(', ')}`
         }
       ],
-      duration: protocol.duration,
+      duration: protocol.totalDuration,
       frequency: protocol.frequency,
       difficulty: 'intermediate',
       contraindications: protocol.contraindications || [],

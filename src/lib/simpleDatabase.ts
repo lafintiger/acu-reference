@@ -75,6 +75,11 @@ class SimpleDatabase {
     return [...this.data.indications];
   }
 
+  async getIndicationById(id: string): Promise<Indication | null> {
+    if (!this.initialized) await this.initialize();
+    return this.data.indications.find(indication => indication.id === id) || null;
+  }
+
   async getTechniques(modalityId?: string): Promise<Technique[]> {
     if (!this.initialized) await this.initialize();
     

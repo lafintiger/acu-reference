@@ -157,26 +157,6 @@ export class DirectExtractor {
     const pages = text.split(/--- Page \d+ ---/);
     return this.findTestPatternsWithPages(text, pages);
   }
-    
-    // Pattern 2: Look for numbered steps or procedures
-    const procedurePattern = /(\d+\.\s*[^\.]+(?:\.[^\.]*){0,3})/gi;
-    const procedures = text.match(procedurePattern) || [];
-    
-    procedures.forEach(proc => {
-      if (proc.toLowerCase().includes('test') || proc.toLowerCase().includes('assess')) {
-        tests.push({
-          name: 'Assessment Procedure',
-          indication: 'assessment',
-          procedure: proc.trim(),
-          points: this.extractPointsFromText(proc),
-          sourceText: proc,
-          confidence: 80
-        });
-      }
-    });
-    
-    return tests;
-  }
 
   // Find correction patterns with page numbers
   static findCorrectionPatternsWithPages(text: string, pages: string[]): any[] {

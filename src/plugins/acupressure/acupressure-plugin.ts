@@ -127,11 +127,11 @@ export class AcupressurePlugin extends BaseModalityPlugin {
   // Convert existing acupressure protocols to new format
   private convertLegacyProtocols(): ModalityProtocol[] {
     return acupressureProtocols.map(protocol => ({
-      id: `acupressure_${protocol.indication}`,
+      id: `acupressure_${protocol.indicationId}`,
       modalityId: 'acupressure',
-      indication: protocol.indication,
-      name: `Acupressure for ${protocol.indication.replace('_', ' ')}`,
-      description: `Acupressure treatment protocol for ${protocol.indication.replace('_', ' ')}`,
+      indication: protocol.indicationId,
+      name: `Acupressure for ${protocol.indicationId.replace('_', ' ')}`,
+      description: `Acupressure treatment protocol for ${protocol.indicationId.replace('_', ' ')}`,
       steps: [
         {
           id: 'preparation',
@@ -149,9 +149,9 @@ export class AcupressurePlugin extends BaseModalityPlugin {
           title: 'Acupressure Application',
           description: protocol.clinicalNotes,
           duration: protocol.totalDuration,
-          points: protocol.primaryPoints,
-          techniques: [protocol.pressure],
-          notes: `Sequence: ${protocol.sequence.join(' → ')}`
+          points: protocol.primaryPoints.map(p => p.pointId),
+          techniques: protocol.primaryPoints.map(p => p.technique),
+          notes: `Primary points: ${protocol.primaryPoints.map(p => p.pointName).join(', ')}`
         },
         {
           id: 'evaluation',
@@ -168,7 +168,7 @@ export class AcupressurePlugin extends BaseModalityPlugin {
       difficulty: 'beginner',
       contraindications: protocol.contraindications || [],
       precautions: [],
-      expectedOutcomes: [`Improvement in ${protocol.indication.replace('_', ' ')}`],
+      expectedOutcomes: [`Improvement in ${protocol.indicationId.replace('_', ' ')}`],
       clinicalNotes: protocol.clinicalNotes
     }));
   }

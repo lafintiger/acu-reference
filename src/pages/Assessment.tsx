@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Stethoscope, Clipboard, Search, Plus, CheckCircle, AlertTriangle } from 'lucide-react';
 import { clinicalSigns, clinicalSymptoms, getSignsByCategory, getSymptomsByCategory } from '../data/signs-symptoms';
 import { chapmanPoints } from '../data/chapman-points';
@@ -11,23 +11,24 @@ const Assessment = () => {
   const [chapmanFindings, setChapmanFindings] = useState<any[]>([]);
   const [assessmentNotes, setAssessmentNotes] = useState('');
 
-  const toggleSign = (signId: string) => {
+  // Memoized event handlers to prevent unnecessary re-renders
+  const toggleSign = useCallback((signId: string) => {
     setSelectedSigns(prev => 
       prev.includes(signId) 
         ? prev.filter(id => id !== signId)
         : [...prev, signId]
     );
-  };
+  }, []);
 
-  const toggleSymptom = (symptomId: string) => {
+  const toggleSymptom = useCallback((symptomId: string) => {
     setSelectedSymptoms(prev => 
       prev.includes(symptomId) 
         ? prev.filter(id => id !== symptomId)
         : [...prev, symptomId]
     );
-  };
+  }, []);
 
-  const addChapmanFinding = (pointId: string, severity: number, notes: string) => {
+  const addChapmanFinding = useCallback((pointId: string, severity: number, notes: string) => {
     const finding = {
       pointId,
       severity,
@@ -35,14 +36,53 @@ const Assessment = () => {
       dateRecorded: new Date().toISOString()
     };
     setChapmanFindings(prev => [...prev, finding]);
-  };
+  }, []);
 
-  const getSeverityColor = (severity: number) => {
+  // Memoized computations for better performance
+  const signsByCategory = useMemo(() => getSignsByCategory(), []);
+  const symptomsByCategory = useMemo(() => getSymptomsByCategory(), []);
+  
+  const assessmentSummary = useMemo(() => {
+    const selectedSignsData = clinicalSigns.filter(sign => selectedSigns.includes(sign.id));
+    const selectedSymptomsData = clinicalSymptoms.filter(symptom => selectedSymptoms.includes(symptom.id));
+    
+    return {
+      signsCount: selectedSigns.length,
+      symptomsCount: selectedSymptoms.length,
+      chapmanCount: chapmanFindings.length,
+      totalFindings: selectedSigns.length + selectedSymptoms.length + chapmanFindings.length,
+      selectedSignsData,
+      selectedSymptomsData
+    };
+  }, [selectedSigns, selectedSymptoms, chapmanFindings]);
+
+  const chapmanInterpretation = useMemo(() => {
+    if (chapmanFindings.length === 0) return null;
+    
+    try {
+      return chapmanPointsPlugin.interpretFindings(
+        chapmanFindings.map(f => ({
+          id: f.pointId,
+          patientId: 'current',
+          findingType: 'diagnostic_point' as const,
+          referenceId: f.pointId,
+          severity: f.severity,
+          notes: f.notes,
+          dateRecorded: f.dateRecorded
+        }))
+      );
+    } catch (error) {
+      console.error('Chapman interpretation error:', error);
+      return 'Unable to interpret Chapman point findings';
+    }
+  }, [chapmanFindings]);
+
+  const getSeverityColor = useCallback((severity: number) => {
     if (severity >= 8) return 'text-red-600';
     if (severity >= 6) return 'text-orange-600';
     if (severity >= 4) return 'text-yellow-600';
     return 'text-green-600';
-  };
+  }, []);
 
   const renderSigns = () => (
     <div className="space-y-6">
